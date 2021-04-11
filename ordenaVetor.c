@@ -16,15 +16,15 @@ void quadraticAlgorithm() {
 
 int* dynamicallyFillArray(int* arraySize, int* arrayOfNumbers) {
 	int size = 0;
-	int temporaryNumber;
+	int numberPerLine;
 
-	while (1 == scanf("%d", &temporaryNumber)) {
+	while (1 == scanf("%d", &numberPerLine)) {
 		int *newArrayOfNumbers = realloc(arrayOfNumbers, ++size * sizeof *newArrayOfNumbers);
 		
 		arrayOfNumbers = newArrayOfNumbers;
-		newArrayOfNumbers[size - 1] = temporaryNumber;
+		newArrayOfNumbers[size - 1] = numberPerLine;
 	}
-	*arraySize = size - 1;
+	*arraySize = size;
 
 	return arrayOfNumbers;
 }
@@ -39,11 +39,12 @@ int main (int argc, char *argv[]) {
 		printf("%d\n", arrayOfNumbers[i]);
 	}
 	
+	printf("%s", argv[1]);
 	// Seleciona o algoritmo desejado
 	if (argc == 1) quadraticAlgorithm();
 	else {
-		if (strcmp(argv[1], "-q")) quickSort();
-		else if (strcmp(argv[1], "-m")) mergeSort();
+		if (strcmp(argv[1], "-q") == 0) quickSort();
+		else if (strcmp(argv[1], "-m") == 0) mergeSort();
 	}
 
 	free(arrayOfNumbers);
