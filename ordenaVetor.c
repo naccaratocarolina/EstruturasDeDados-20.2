@@ -14,34 +14,55 @@ void quadraticAlgorithm() {
 	printf("quadratico");
 }
 
-int* dynamicallyFillArray(int* arrayOfNumbers) {
+int* dynamicallyFillArray(FILE *numbersFile, int* arrayOfNumbers) {
 	int size = 0;
 	int temporaryNumber;
+	char c;
 
-	while (1 == scanf("%d", &temporaryNumber)) {
+	for (c = getc(numbersFile); c != EOF; c = getc(numbersFile)) {
+		fscanf(numbersFile, "%d", &temporaryNumber);
+
 		int *newArrayOfNumbers = realloc(arrayOfNumbers, ++size * sizeof *newArrayOfNumbers);
 		
 		arrayOfNumbers = newArrayOfNumbers;
 		newArrayOfNumbers[size - 1] = temporaryNumber;
 	}
 
+	for (int i=0; i<size;i++) {
+		printf("%d\n", arrayOfNumbers[i]);
+	}
+
 	return arrayOfNumbers;
 }
 
-int main () {
+int main (int argc, char *argv[]) {
 	char algorithm[10];
-	char q = 'q', m = 'm';
+	FILE *numbersFile;
 	int* arrayOfNumbers = NULL;
 
-  printf("Informe o algoritmo: ");
-  fgets(algorithm, 10, stdin);
+	// Verifica se recebeu os argumentos de entrada
+	if (argc < 3) {
+		printf("Voce nao inseriu todos os argumentos necessarios!");
+		return 1;
+	}
 
-  printf("%c", algorithm[1]);
-	if (algorithm[1] == q) quickSort();
-	else if (algorithm[1] == m) mergeSort();
+	// Abre o arquivo de entrada e verifica sucesso
+	numbersFile = fopen(argv[1], "r");
+	if (numbersFile == NULL) {
+		printf("Erro de abertura do arquivo de entrada (%s)\n", argv[1]);
+		return 2;
+	}
+
+	arrayOfNumbers = dynamicallyFillArray(numbersFile, arrayOfNumbers);
+
+	// Preenche o algoritmo confirme o parametro dado
+	strcpy(algorithm, argv[2]);
+	
+	// Seleciona o algoritmo desejado
+	if (algorithm[1] == 'q') quickSort();
+	else if (algorithm[1] == 'm') mergeSort();
 	else quadraticAlgorithm();
 
-	arrayOfNumbers = dynamicallyFillArray(arrayOfNumbers);
 	free(arrayOfNumbers);
 
 	return(0);
