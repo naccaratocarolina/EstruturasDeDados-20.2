@@ -31,8 +31,57 @@ void  quickSort(int* arrayOfNumbers, int start, int end) {
 	}
 }
 
-void mergeSort() {
-	printf("merge sort");
+void merge(int* arrayOfNumbers, int start, int middle, int end) {
+	int n1 = middle - start + 1;
+	int n2 = end - middle;
+
+	int tempArray1[n1], tempArray2[n2];
+
+	for (int i=0; i<n1; i++) {
+		tempArray1[i] = arrayOfNumbers[start + i];
+	}
+
+	for (int j=0; j<n2; j++) {
+		tempArray2[j] = arrayOfNumbers[middle + 1 + j];
+	}
+
+	int i = 0;
+	int j = 0;
+	int k = start;
+	
+	while (i < n1 && j < n2) {
+		if (tempArray1[i] <= tempArray2[j]) {
+			arrayOfNumbers[k] = tempArray1[i];
+			i += 1;
+		}
+
+		else {
+			arrayOfNumbers[k] = tempArray2[j];
+			j += 1;
+		}
+		k += 1;
+	}
+
+	while (i < n1) {
+		arrayOfNumbers[k] = tempArray1[i];
+		i += 1;
+		k += 1;
+	}
+
+	while (j < n2) {
+		arrayOfNumbers[k] = tempArray2[j];
+		j += 1;
+		k += 1;
+	}
+}
+
+void mergeSort(int* arrayOfNumbers, int start, int end) {
+	if (start < end) {
+		int middle = (start + end)/2;
+		mergeSort(arrayOfNumbers, start, middle);
+		mergeSort(arrayOfNumbers, middle + 1, end);
+		merge(arrayOfNumbers, start, middle, end);
+	}
 }
 
 void quadraticAlgorithm() {
@@ -71,7 +120,7 @@ int main (int argc, char *argv[]) {
 	if (argc == 1) quadraticAlgorithm();
 	else {
 		if (strcmp(argv[1], "-q") == 0) quickSort(arrayOfNumbers, 0, arraySize - 1);
-		else if (strcmp(argv[1], "-m") == 0) mergeSort();
+		else if (strcmp(argv[1], "-m") == 0) mergeSort(arrayOfNumbers, 0, arraySize - 1);
 	}
 	
 	printf("%s", "\n");
