@@ -84,8 +84,14 @@ void mergeSort(int* arrayOfNumbers, int start, int end) {
 	}
 }
 
-void quadraticAlgorithm() {
-	printf("quadratico");
+void bubbleSort(int* arrayOfNumbers, int arraySize) {
+	for (int i=1; i<arraySize; i++) {
+		for (int j=0; j<arraySize-i; j++) {
+			if (arrayOfNumbers[j] > arrayOfNumbers[j + 1]) {
+				exchange(&arrayOfNumbers[j], &arrayOfNumbers[j+1]);
+			}
+		}
+	}
 }
 
 void printArrayOfNumbers(int* arrayOfNumbers, int arraySize) {
@@ -114,16 +120,14 @@ int main (int argc, char *argv[]) {
 	int arraySize;
 
 	arrayOfNumbers = dynamicallyFillArray(&arraySize, arrayOfNumbers);
-	printArrayOfNumbers(arrayOfNumbers, arraySize);
 
 	// Seleciona o algoritmo desejado
-	if (argc == 1) quadraticAlgorithm();
+	if (argc == 1) bubbleSort(arrayOfNumbers, arraySize);
 	else {
 		if (strcmp(argv[1], "-q") == 0) quickSort(arrayOfNumbers, 0, arraySize - 1);
 		else if (strcmp(argv[1], "-m") == 0) mergeSort(arrayOfNumbers, 0, arraySize - 1);
 	}
 	
-	printf("%s", "\n");
 	printArrayOfNumbers(arrayOfNumbers, arraySize);
 	
 	free(arrayOfNumbers);
