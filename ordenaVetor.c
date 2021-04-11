@@ -14,7 +14,7 @@ void quadraticAlgorithm() {
 	printf("quadratico");
 }
 
-int* dynamicallyFillArray(FILE *numbersFile, int* arrayOfNumbers) {
+int* dynamicallyFillArray(FILE *numbersFile, int* arraySize, int* arrayOfNumbers) {
 	int size = 0;
 	int temporaryNumber;
 	char c;
@@ -28,9 +28,7 @@ int* dynamicallyFillArray(FILE *numbersFile, int* arrayOfNumbers) {
 		newArrayOfNumbers[size - 1] = temporaryNumber;
 	}
 
-	for (int i=0; i<size;i++) {
-		printf("%d\n", arrayOfNumbers[i]);
-	}
+	*arraySize = size;
 
 	return arrayOfNumbers;
 }
@@ -39,9 +37,10 @@ int main (int argc, char *argv[]) {
 	char algorithm[10];
 	FILE *numbersFile;
 	int* arrayOfNumbers = NULL;
+	int arraySize;
 
 	// Verifica se recebeu os argumentos de entrada
-	if (argc < 3) {
+	if (argc < 2) {
 		printf("Voce nao inseriu todos os argumentos necessarios!");
 		return 1;
 	}
@@ -53,10 +52,14 @@ int main (int argc, char *argv[]) {
 		return 2;
 	}
 
-	arrayOfNumbers = dynamicallyFillArray(numbersFile, arrayOfNumbers);
+	arrayOfNumbers = dynamicallyFillArray(numbersFile, &arraySize, arrayOfNumbers);
+
+	for (int i=0; i<arraySize; i++) {
+		printf("%d\n", arrayOfNumbers[i]);
+	}
 
 	// Preenche o algoritmo confirme o parametro dado
-	strcpy(algorithm, argv[2]);
+	if (argv[2]) strcpy(algorithm, argv[2]);
 	
 	// Seleciona o algoritmo desejado
 	if (algorithm[1] == 'q') quickSort();
