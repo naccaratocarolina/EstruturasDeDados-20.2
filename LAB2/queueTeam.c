@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include <string.h>
 
 typedef struct {
     // Posicao do primeiro e ultimo elemento
@@ -14,22 +15,6 @@ typedef struct {
     // Array de elementos
     int* elements;
 } Queue;
-
-typedef struct {
-    int numberOfElements;
-    int* elements;
-} Team;
-
-typedef struct {
-    // Scenario #id
-    int scenario;
-
-    // Numeros de times
-    int numberOfTeams;
-
-    // Elementos do time
-    Team* elements;
-} Teams;
 
 int isFull(Queue *queue);
 int isEmpty(Queue *queue);
@@ -54,7 +39,7 @@ Queue* initializeQueue(int capacity) {
 
 // Funcao que adiciona um item a queue
 // Altera a tail
-int  enqueue(Queue *queue, int newElement) {
+void  enqueue(Queue *queue, int newElement) {
     // Verifica se a queue esta cheia
     if (isFull(queue)) {
         // Se sim, produz erro de overflow e encerra o programa
@@ -66,13 +51,12 @@ int  enqueue(Queue *queue, int newElement) {
     queue->tail = (queue->tail + 1) % queue->capacity;
     queue->elements[queue->tail] = newElement;
     queue->size = queue->size + 1;
-    return newElement;
-
+    //printf("item add: %d\n", newElement);
 }
 
 // Funcao que remove um item do queue
 // Altera a head
-int dequeue(Queue *queue) {
+void dequeue(Queue *queue) {
     // Verifica se a queue esta vazia
     if (isEmpty(queue)) {
         // Se sim, produz erro de overflow e encerra o programa
@@ -85,7 +69,7 @@ int dequeue(Queue *queue) {
     // Seta uma nova head para o proximo elemento do array
     queue->head = (queue->head + 1);
     queue->size = queue->size - 1;
-    return head;
+    printf("%d\n", head);
 }
 
 // Verifica se a queue esta na sua capacidade maxima
@@ -103,34 +87,49 @@ int peek(Queue *queue) {
     return queue->elements[queue->head];
 }
 
-void commandsLoop() {
-
+void commandsLoop(Queue *queue) {
+    char command[256];
+    do {
+        scanf("%s", command);
+        if (strcmp(command, "ENQUEUE") == 0) {
+           int element;
+            scanf("%d", &element);
+            enqueue(queue, element);
+        }
+        else if (strcmp(command, "DEQUEUE") == 0) {
+            dequeue(queue);
+        }
+    } while (strcmp(command, "STOP") != 0);
 }
 
 void elementsLoop(Queue *queue) {
     int numberOfTeams, numberOfElements, element;
     
     // Le o numero de times
-    scanf("%d", &numberOfTeams);
+    scanf("%d\n", &numberOfTeams);
+    if (numberOfTeams == 0) {
+        printf("t = 0\n");
+        exit(0);
+    }
+
     for (int i=0; i<numberOfTeams; ++i) {
         // Le o numero de elementos
-        scanf("%d", &numberOfElements);
+        scanf("%d\n", &numberOfElements);
         for (int j=0; j<numberOfElements; ++j) {
-            scanf("%d", &element);
+            scanf("%d\n", &element);
             // Adiciona o elemento na queue
             enqueue(queue, element);
         }
     }
-
-    // Quando termina de ler os numeros, comeca a ler os comandos
-    commandsCommands();
-}
-
-void teamLoop() {
-
 }
 
 int main (int argc, char *argv[]) {
-    int* scenario;
-    // Criterio de parada: 0 depois do STOP
+    int scenario;
+    int numberOfTeams;
+    Queue *queue = initializeQueue(100);
+     
+    elementsLoop(queue);
+    commandsLoop(queue);
+    
+    return 0;
 }
