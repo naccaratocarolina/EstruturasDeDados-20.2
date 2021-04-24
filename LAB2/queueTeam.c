@@ -16,6 +16,22 @@ typedef struct {
     int* elements;
 } Queue;
 
+typedef struct {
+  // Numero de elementos do time
+  int numberOfElements;
+
+  // Array de elementos do time
+  int* elements;
+} Team;
+
+typedef struct {
+  // id
+  int scenario;
+
+  // Array de times de um cenario
+  Team* teams;
+} Teams;
+
 int isFull(Queue *queue);
 int isEmpty(Queue *queue);
 int peek(Queue *queue);
@@ -46,12 +62,11 @@ void  enqueue(Queue *queue, int newElement) {
         printf("Nao eh mais possivel adicionar items nessa queue");
         exit(0);
     }
-    
+
     // Se nao estiver cheia, incrementa o ponteiro tail para apontar para o proximo espaco vazio
     queue->tail = (queue->tail + 1) % queue->capacity;
     queue->elements[queue->tail] = newElement;
     queue->size = queue->size + 1;
-    //printf("item add: %d\n", newElement);
 }
 
 // Funcao que remove um item do queue
@@ -92,6 +107,7 @@ void commandsLoop(Queue *queue) {
     char command[256];
     do {
         scanf("%s", command);
+        //printf("%s\n", command);
         if (strcmp(command, "ENQUEUE") == 0) {
            int element;
             scanf("%d", &element);
@@ -106,14 +122,19 @@ void commandsLoop(Queue *queue) {
 // Percorre o elemento dos times e vai preenchenco o queue
 void elementsLoop(Queue *queue, int numberOfTeams) {
     int numberOfElements, element;
+    int size = 0;
+    Team *team = (Team*) malloc(sizeof(Team));
     
-    for (int i=0; i<numberOfTeams; ++i) {
+    for (int i=1; i<=numberOfTeams; ++i) {
         // Le o numero de elementos
-        scanf("%d\n", &numberOfElements);
+        scanf("%d", &numberOfElements);
+        size += numberOfElements;
+        
+        team->elements = (int*) malloc(sizeof(int) * numberOfElements);
+
         for (int j=0; j<numberOfElements; ++j) {
             scanf("%d\n", &element);
-            // Adiciona o elemento na queue
-            enqueue(queue, element);
+            team->elements[j] = element;
         }
     }
 }
@@ -128,20 +149,20 @@ int main (int argc, char *argv[]) {
     do {
         // Inicializando a queue
         queue = initializeQueue(100);
-        
+
         // Le o numero de times
         scanf("%d\n", &numberOfTeams);
         if (numberOfTeams == 0) exit(0);
 
         // Printa o scenario
         printf("Scenario #%d\n", scenario);
-        
+
         // Inicia o ciclo
         elementsLoop(queue, numberOfTeams);
         commandsLoop(queue);
         free(queue);
         scenario++;
-        printf("\n");
+        //printf("\n");
     } while (numberOfTeams != 0);
 
     return 0;
