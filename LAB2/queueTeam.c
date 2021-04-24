@@ -15,6 +15,22 @@ typedef struct {
     int* elements;
 } Queue;
 
+typedef struct {
+    int numberOfElements;
+    int* elements;
+} Team;
+
+typedef struct {
+    // Scenario #id
+    int scenario;
+
+    // Numeros de times
+    int numberOfTeams;
+
+    // Elementos do time
+    Team* elements;
+} Teams;
+
 int isFull(Queue *queue);
 int isEmpty(Queue *queue);
 int peek(Queue *queue);
@@ -38,7 +54,7 @@ Queue* initializeQueue(int capacity) {
 
 // Funcao que adiciona um item a queue
 // Altera a tail
-void enqueue(Queue *queue, int newElement) {
+int  enqueue(Queue *queue, int newElement) {
     // Verifica se a queue esta cheia
     if (isFull(queue)) {
         // Se sim, produz erro de overflow e encerra o programa
@@ -50,7 +66,7 @@ void enqueue(Queue *queue, int newElement) {
     queue->tail = (queue->tail + 1) % queue->capacity;
     queue->elements[queue->tail] = newElement;
     queue->size = queue->size + 1;
-    printf("%d", newElement);
+    return newElement;
 
 }
 
@@ -87,12 +103,34 @@ int peek(Queue *queue) {
     return queue->elements[queue->head];
 }
 
-void show() {
+void commandsLoop() {
+
+}
+
+void elementsLoop(Queue *queue) {
+    int numberOfTeams, numberOfElements, element;
+    
+    // Le o numero de times
+    scanf("%d", &numberOfTeams);
+    for (int i=0; i<numberOfTeams; ++i) {
+        // Le o numero de elementos
+        scanf("%d", &numberOfElements);
+        for (int j=0; j<numberOfElements; ++j) {
+            scanf("%d", &element);
+            // Adiciona o elemento na queue
+            enqueue(queue, element);
+        }
+    }
+
+    // Quando termina de ler os numeros, comeca a ler os comandos
+    commandsCommands();
+}
+
+void teamLoop() {
 
 }
 
 int main (int argc, char *argv[]) {
-    Queue *queue = initializeQueue(10);
-    enqueue(queue, 10);
-    dequeue(queue);
+    int* scenario;
+    // Criterio de parada: 0 depois do STOP
 }
