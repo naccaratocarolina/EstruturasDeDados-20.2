@@ -87,6 +87,7 @@ int peek(Queue *queue) {
     return queue->elements[queue->head];
 }
 
+
 void commandsLoop(Queue *queue) {
     char command[256];
     do {
@@ -102,16 +103,10 @@ void commandsLoop(Queue *queue) {
     } while (strcmp(command, "STOP") != 0);
 }
 
-void elementsLoop(Queue *queue) {
-    int numberOfTeams, numberOfElements, element;
+// Percorre o elemento dos times e vai preenchenco o queue
+void elementsLoop(Queue *queue, int numberOfTeams) {
+    int numberOfElements, element;
     
-    // Le o numero de times
-    scanf("%d\n", &numberOfTeams);
-    if (numberOfTeams == 0) {
-        printf("t = 0\n");
-        exit(0);
-    }
-
     for (int i=0; i<numberOfTeams; ++i) {
         // Le o numero de elementos
         scanf("%d\n", &numberOfElements);
@@ -126,10 +121,28 @@ void elementsLoop(Queue *queue) {
 int main (int argc, char *argv[]) {
     int scenario;
     int numberOfTeams;
-    Queue *queue = initializeQueue(100);
-     
-    elementsLoop(queue);
-    commandsLoop(queue);
-    
+    Queue *queue;
+
+    // Loop principal
+    scenario = 1;
+    do {
+        // Inicializando a queue
+        queue = initializeQueue(100);
+        
+        // Le o numero de times
+        scanf("%d\n", &numberOfTeams);
+        if (numberOfTeams == 0) exit(0);
+
+        // Printa o scenario
+        printf("Scenario #%d\n", scenario);
+        
+        // Inicia o ciclo
+        elementsLoop(queue, numberOfTeams);
+        commandsLoop(queue);
+        free(queue);
+        scenario++;
+        printf("\n");
+    } while (numberOfTeams != 0);
+
     return 0;
 }
