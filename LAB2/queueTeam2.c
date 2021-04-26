@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
   // Numero de elementos
@@ -21,6 +22,8 @@ typedef struct Node Node;
 typedef struct {
   Node *head, *tail;
 } Queue;
+
+int findElementTeam(Team *data[], int numberOfTeams, int element);
 
 Node *createNewNode(int value) {
   Node *newNode = (Node*) malloc(sizeof(Node));
@@ -67,10 +70,17 @@ Queue *initQueue() {
   return queue;
 }
 
-void enqueue(Queue *queue, Team *data[], int value) {
+void enqueue(Queue *queue, Team *data[], int numberOfTeams, int value) {
   Node *newNode = createNewNode(value);
-  
-  printf("%d\n", findElementTeam(data, 8, value));
+  Node *temp = queue->head;
+ 
+  while (temp != NULL) {  
+    if (findElementTeam(data, numberOfTeams, temp->value) == findElementTeam(data, numberOfTeams, value)) {
+      insertAfterNode(temp, createNewNode(value));
+      return;
+    }
+    temp = temp->next;
+  }
 
   // Adiciona o novo elemento no final do queue
   if (queue->tail != NULL) {
@@ -127,6 +137,22 @@ int findElementTeam(Team *data[], int numberOfTeams, int element) {
   return -1;
 }
 
+void commandsLoop(Queue *queue, Team *data[], int numberOfTeams) {
+    char command[256];
+    do {
+        scanf("%s", command);
+        //printf("%s\n", command);
+        if (strcmp(command, "ENQUEUE") == 0) {
+           int element;
+            scanf("%d", &element);
+            enqueue(queue, data, numberOfTeams, element);
+        }
+        else if (strcmp(command, "DEQUEUE") == 0) {
+            dequeue(queue);
+        }
+    } while (strcmp(command, "STOP") != 0);
+}
+
 void elementsLoop(Team *data[], int numberOfTeams) {
   int numberOfElements, element;
 
@@ -165,9 +191,10 @@ int main (int argc, char *argv[]) {
   Team *data[numberOfTeams];
   data[numberOfTeams] = (Team*) malloc(sizeof(Team) * numberOfTeams);
 
+  Queue *queue = initQueue();
   elementsLoop(data, numberOfTeams);
-
-  //printf("%d\n", findElementTeam(data, numberOfTeams, 60));
+  commandsLoop(queue, data, numberOfTeams);
+  //free(queue);
   
 /*
   Node *head = NULL;
@@ -185,21 +212,12 @@ int main (int argc, char *argv[]) {
 
   printLinkedList(head);*/
 
-  Queue *queue = initQueue();
-  enqueue(queue, data, 10);
-  enqueue(queue, data, 11);
-  enqueue(queue, data, 63);
-  enqueue(queue, data, 48);
-  enqueue(queue, data, 20);
-  enqueue(queue, data, 0);
-  dequeue(queue);
-
-  Node *temp;
-  temp = findNode(queue->head, 11);
+  //Node *temp;
+  //temp = findNode(queue->head, 11);
   //printf("%d\n", temp->value);
 
-  insertAfterNode(temp, createNewNode(70));
+  //insertAfterNode(temp, createNewNode(70));
 
-  printLinkedList(queue->head);
+  //printLinkedList(queue->head);
 
 }
