@@ -9,6 +9,99 @@ typedef struct {
   int* elements;
 } Team;
 
+struct Node { // Linked List
+  // Elemento armazenado no no
+  int value;
+
+  // Ponteiro next
+  struct Node* next;
+};
+typedef struct Node Node;
+
+typedef struct {
+  Node *head, *tail;
+} Queue;
+
+Node *createNewNode(int value) {
+  Node *newNode = (Node*) malloc(sizeof(Node));
+  newNode->value = value;
+  newNode->next = NULL;
+  return newNode;
+}
+
+Node *insertInHead(Node **head, Node *nodeToInsert) {
+  nodeToInsert->next = *head;
+  *head = nodeToInsert;
+  return nodeToInsert;
+}
+
+Node *findNode(Node *head, int value) {
+  Node *temp = head;
+
+  while (temp != NULL) {
+    if (temp->value == value) return temp;
+    temp = temp->next;
+  }
+
+  return NULL;
+}
+
+void *insertAfterNode(Node *nodeToInsertAfter, Node* newNode) {
+  newNode->next = nodeToInsertAfter->next;
+  nodeToInsertAfter->next = newNode;
+}
+
+void printLinkedList(Node *head) {
+  Node *temp = head;
+
+  while (temp != NULL) {
+    printf("%d - ", temp->value);
+    temp = temp->next;
+  }
+  printf("\n");
+}
+
+Queue *initQueue() {
+  Queue *queue = (Queue*) malloc(sizeof(Queue));
+  queue->head = queue->tail = NULL;
+  return queue;
+}
+
+void enqueue(Queue *queue, Team *data[], int value) {
+  Node *newNode = createNewNode(value);
+  
+  printf("%d\n", findElementTeam(data, 8, value));
+
+  // Adiciona o novo elemento no final do queue
+  if (queue->tail != NULL) {
+    queue->tail->next = newNode;
+  }
+  queue->tail = newNode;
+
+  // Se a queue esta vazia, adiciona o novo elemento na head
+  if (queue->head == NULL) {
+    queue->head = newNode;
+  }
+}
+
+void dequeue(Queue *queue) {
+  // Se a Queue estiver vazia
+  if (queue->head == NULL) return;
+  
+  // Salvamos a head do queue
+  Node *temp = queue->head;
+  int head = temp->value;
+
+  // Removemos a head do queue
+  queue->head = queue->head->next;
+  if (queue->head == NULL) {
+    queue->tail = NULL;
+  }
+  free(temp);
+
+  printf("%d\n", head);
+}
+
 int binarySearch(int elements[], int left, int right, int element) {
   if (right >= left) {
     int middle = left + (right - left) / 2;
@@ -21,7 +114,7 @@ int binarySearch(int elements[], int left, int right, int element) {
   return -1;
 }
 
-int lookForElementInArrayOfTeams(Team *data[], int numberOfTeams, int element) {
+int findElementTeam(Team *data[], int numberOfTeams, int element) {
   // Itera pelos times
   for (int i=0; i<numberOfTeams; ++i) {
     // Itera pelos elementos do time
@@ -74,5 +167,39 @@ int main (int argc, char *argv[]) {
 
   elementsLoop(data, numberOfTeams);
 
-  printf("%d\n", lookForElementInArrayOfTeams(data, numberOfTeams, 60));
+  //printf("%d\n", findElementTeam(data, numberOfTeams, 60));
+  
+/*
+  Node *head = NULL;
+  Node *temp;
+  
+  for (int i=0; i<25; ++i) {
+    temp = createNewNode(i);
+    insertInHead(&head, temp);
+  }
+
+  temp = findNode(head, 13);
+  //printf("\n%d\n", temp->value);
+
+  insertAfterNode(temp, createNewNode(75));
+
+  printLinkedList(head);*/
+
+  Queue *queue = initQueue();
+  enqueue(queue, data, 10);
+  enqueue(queue, data, 11);
+  enqueue(queue, data, 63);
+  enqueue(queue, data, 48);
+  enqueue(queue, data, 20);
+  enqueue(queue, data, 0);
+  dequeue(queue);
+
+  Node *temp;
+  temp = findNode(queue->head, 11);
+  //printf("%d\n", temp->value);
+
+  insertAfterNode(temp, createNewNode(70));
+
+  printLinkedList(queue->head);
+
 }
