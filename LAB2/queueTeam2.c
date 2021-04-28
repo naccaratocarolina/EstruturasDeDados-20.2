@@ -300,6 +300,7 @@ void elementsLoop(Team *data[], int numberOfTeams) {
 
 int main (int argc, char *argv[]) {
   int numberOfTeams;
+  int scenario;
 
   // Armazena o numero total de times
   scanf("%d", &numberOfTeams);
@@ -308,7 +309,23 @@ int main (int argc, char *argv[]) {
   Team *data[numberOfTeams];
   data[numberOfTeams] = (Team*) malloc(sizeof(Team) * numberOfTeams);
 
-  Queue *queue = initQueue();
-  elementsLoop(data, numberOfTeams);
-  commandsLoop(queue, data, numberOfTeams);
+  // Loop principal
+  scenario = 1;
+  do {
+    // Le o numero de times
+    scanf("%d\n", &numberOfTeams);
+    if (numberOfTeams == 0) exit(0);
+
+    // Printa o scenario
+    printf("Scenario #%d\n", scenario);
+
+    Queue *queue = initQueue();
+    elementsLoop(data, numberOfTeams);
+    commandsLoop(queue, data, numberOfTeams);
+    free(queue);
+    scenario++;
+    printf("\n");
+  } while (numberOfTeams != 0);
+
+  return 0;
 }
