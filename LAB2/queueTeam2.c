@@ -38,6 +38,21 @@ Node *insertInHead(Node **head, Node *nodeToInsert) {
   return nodeToInsert;
 }
 
+void reverseQueue(Node **head) {
+  Node* prev = NULL;
+  Node* current = *head;
+  Node* next = NULL;
+
+  while (current != NULL) {
+    next = current->next;
+    current->next = prev;
+    prev = current;
+    current = next;
+  }
+
+  *head = prev;
+}
+
 Node *findNode(Node *head, int value) {
   Node *temp = head;
 
@@ -49,9 +64,23 @@ Node *findNode(Node *head, int value) {
   return NULL;
 }
 
-void *insertAfterNode(Node *nodeToInsertAfter, Node* newNode) {
+void insertAfterNode(Node *nodeToInsertAfter, Node* newNode) {
+  // Checa se o no dado eh nulo
+  if (nodeToInsertAfter == NULL) exit(0);
+
   newNode->next = nodeToInsertAfter->next;
   nodeToInsertAfter->next = newNode;
+}
+
+void insertBeforeNode(Node *head, Node *nodeToInsertBefore, Node* newNode) {
+  Node *prev = head;
+  Node *next = head;
+  //printf("%d %d\n", prev->value, next->value);
+  // Esse loop vai retornar o no anterior ao fornecido
+
+  for (next, prev; next != nodeToInsertBefore; prev = next, next = next->next);
+  newNode->next = prev->next;
+  prev->next = newNode;
 }
 
 void printLinkedList(Node *head) {
@@ -70,34 +99,96 @@ Queue *initQueue() {
   return queue;
 }
 
-void enqueue(Queue *queue, Team *data[], int numberOfTeams, int value) {
-  Node *newNode = createNewNode(value);
-  Node *temp = queue->head;
- 
-  while (temp != NULL) {  
-    if (findElementTeam(data, numberOfTeams, temp->value) == findElementTeam(data, numberOfTeams, value)) {
-      insertAfterNode(temp, createNewNode(value));
-      return;
+void furaFila(Node *head, Team *data[], int numberOfTeams, int value) {
+  if (findElementTeam(data, numberOfTeams, head->value) == findElementTeam(data, numberOfTeams, value)) {
+    printf("cheguei aqui");
+    insertInHead(&head, createNewNode(value));
+    return;
+  }
+  else {
+    Node *temp = head->next;
+
+    while (temp != NULL) {
+      printf("Comparando %d com %d\n", temp->value, value);
+      if(findElementTeam(data, numberOfTeams, temp->value) == findElementTeam(data, numberOfTeams, value)) {
+           printf("Cheguei aqui!\n");
+            printf("%d != %d\n", head->value, temp->value);
+           insertBeforeNode(head, temp, createNewNode(value));
+           return;
+      }
+      temp = temp->next;
     }
-    temp = temp->next;
-  }
-
-  // Adiciona o novo elemento no final do queue
-  if (queue->tail != NULL) {
-    queue->tail->next = newNode;
-  }
-  queue->tail = newNode;
-
-  // Se a queue esta vazia, adiciona o novo elemento na head
-  if (queue->head == NULL) {
-    queue->head = newNode;
   }
 }
 
+void *enqueue(Queue *queue, Team *data[], int numberOfTeams, int value) {
+  //furaFila(queue->head, data, numberOfTeams, value);
+
+  if (queue->tail == NULL) {
+    queue->head = queue->tail = createNewNode(value);
+  } else {
+    insertInHead(&queue->head, createNewNode(value));
+  }
+}
+
+void deleteNode(Queue *queue, Node **head, int value) {
+  Node *temp = *head;
+  Node *prev = NULL;
+
+  if (temp != NULL && temp->value == value) {
+    *head = temp->next;
+    free(temp);
+    return;
+  }
+
+  else {
+    while (temp != NULL && temp->value != value) {
+      prev = temp; // prev tail
+      temp = temp->next; // tail
+    }
+  }
+
+  if (temp == NULL) return;
+  if (prev->next == NULL) {
+    prev->next = temp->next;
+    queue->tail = prev;
+    return;
+  }
+
+
+  prev->next = temp->next;
+  free(temp);
+}
+
 void dequeue(Queue *queue) {
+  if (queue->head == NULL) {
+    return;
+  }
+
+  if (queue->head == queue->tail) {
+    printf("%d\n", queue->head->value);
+    queue->head = queue->tail = NULL;
+    return;
+  }
+
+  Node *temp = queue->head;
+  Node *t;
+  while (temp->next != NULL) {
+    t = temp;
+    temp = temp->next;
+  }
+  printf("%d\n", t->next->value);
+  free(t->next);
+  t->next = NULL;
+  queue->tail = t;
+/*
+  Node *temp = queue->head;
+  queue->head = queue->head->next;
+  printf("%d\n", temp->value);
+  free(temp);
   // Se a Queue estiver vazia
   if (queue->head == NULL) return;
-  
+
   // Salvamos a head do queue
   Node *temp = queue->head;
   int head = temp->value;
@@ -109,7 +200,7 @@ void dequeue(Queue *queue) {
   }
   free(temp);
 
-  printf("%d\n", head);
+  printf("%d\n", queue->head->value);*/
 }
 
 int binarySearch(int elements[], int left, int right, int element) {
@@ -136,6 +227,33 @@ int findElementTeam(Team *data[], int numberOfTeams, int element) {
 
   return -1;
 }
+void *pushNodes(Queue *queue, Team *data[], int numberOfTeams, int value) {
+  if (queue->tail == NULL || queue->head == NULL) {
+    queue->head = queue->tail = createNewNode(value);
+    return;
+  }
+
+  // Se o value for do mesmo time do elemento da head
+  if (findElementTeam(data, numberOfTeams, queue->head->value) == findElementTeam(data, numberOfTeams, value)) {
+    //printf("%d\n", value);
+    insertInHead(&queue->head, createNewNode(value));
+    return;
+  }
+  // Caso contrario, procurar o primeiro elemento do time de value
+  else {
+    Node *temp = queue->head->next;
+
+    while (temp != NULL) {
+      if(findElementTeam(data, numberOfTeams, temp->value) == findElementTeam(data, numberOfTeams, value)) {
+        insertBeforeNode(queue->head, temp, createNewNode(value));
+           return;
+      }
+      temp = temp->next;
+    }
+  }
+
+  insertInHead(&queue->head, createNewNode(value));
+}
 
 void commandsLoop(Queue *queue, Team *data[], int numberOfTeams) {
     char command[256];
@@ -145,7 +263,7 @@ void commandsLoop(Queue *queue, Team *data[], int numberOfTeams) {
         if (strcmp(command, "ENQUEUE") == 0) {
            int element;
             scanf("%d", &element);
-            enqueue(queue, data, numberOfTeams, element);
+            pushNodes(queue, data, numberOfTeams, element);
         }
         else if (strcmp(command, "DEQUEUE") == 0) {
             dequeue(queue);
@@ -163,7 +281,7 @@ void elementsLoop(Team *data[], int numberOfTeams) {
 
     // Cria um struct Team
     Team *team = (Team*) malloc(sizeof(Team));
-   
+
     // Armazena a quantidade de elementos do time
     team->numberOfElements = numberOfElements;
 
@@ -173,9 +291,8 @@ void elementsLoop(Team *data[], int numberOfTeams) {
     for (int j=0; j<numberOfElements; ++j){
       scanf("%d", &element);
       team->elements[j] = element;
-      //printf("%d\n", team->elements[j]);
     }
-    
+
     // Preenche o array de times
     data[i] = team;
   }
@@ -186,7 +303,7 @@ int main (int argc, char *argv[]) {
 
   // Armazena o numero total de times
   scanf("%d", &numberOfTeams);
- 
+
   // Inicializa variavel que vai guardar um array de times
   Team *data[numberOfTeams];
   data[numberOfTeams] = (Team*) malloc(sizeof(Team) * numberOfTeams);
@@ -194,30 +311,4 @@ int main (int argc, char *argv[]) {
   Queue *queue = initQueue();
   elementsLoop(data, numberOfTeams);
   commandsLoop(queue, data, numberOfTeams);
-  //free(queue);
-  
-/*
-  Node *head = NULL;
-  Node *temp;
-  
-  for (int i=0; i<25; ++i) {
-    temp = createNewNode(i);
-    insertInHead(&head, temp);
-  }
-
-  temp = findNode(head, 13);
-  //printf("\n%d\n", temp->value);
-
-  insertAfterNode(temp, createNewNode(75));
-
-  printLinkedList(head);*/
-
-  //Node *temp;
-  //temp = findNode(queue->head, 11);
-  //printf("%d\n", temp->value);
-
-  //insertAfterNode(temp, createNewNode(70));
-
-  //printLinkedList(queue->head);
-
 }
