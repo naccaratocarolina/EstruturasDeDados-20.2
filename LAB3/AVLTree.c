@@ -10,11 +10,7 @@ struct Node {
 };
 typedef struct Node Node;
 
-static int getMaxNumber(int a, int b) {
-	return (a > b)? a : b;
-}
-
-static Node *createNewNode(int value) {
+Node *createNewNode(int value) {
 	Node *newNode = (Node*) malloc(sizeof(Node));
 
 	// Inicializa as variaveis da arvore AVL
@@ -25,94 +21,113 @@ static Node *createNewNode(int value) {
 	return newNode;
 }
 
-static int getNumberOfLevels(Node *node) {
+int getMaxNumber(int a, int b) {
+	return (a > b)? a : b;
+}
+
+int getLevels(Node *node) {
 	// se a arvore estiver vazia
 	if (node == NULL) return 0;
 
+	// caso contrario, retorna a propriedade levels do no dado
 	return node->levels;
 }
 
-// Uma sub-arvore esta desequilibrada quando o resultado dessa funcao eh maior do que 1
-// ou menor do que -1
-// Toleramos numeros de desequilibrio de 0, 1 e -1
-static int getImbalanceFactor(Node *node) {
+int getBalanceFactor(Node *node) {
 	// se a arvore estiver vazia
 	if (node == NULL) return 0;
 
 	// Encontramos o equilibrio da arvore subtraindo o numeros de niveis
 	// na sub-arvore da esquerda do numero de niveis da sub-arvore da direita
-	return getNumberOfLevels(node->left) - getNumberOfLevels(node->right);
+	return getLevels(node->left) - getLevels(node->right);
 }
 
-Node *leftRotation(Node *root) {
- Node *x = root->right; // filho da direita da root atual (nova raiz)
- Node *y = x->left; // filho da esquerda do filho da direita da root
-
- // Raiz atual vira o filho da esquerda do seu filho da direita
- x->left = root;
-
- // Filho da esquerda do filho da direita da raiz vira o filho da direita da nova posicao da raiz
- root->right = y;
-
- // Atualiza o numero de niveis
- root->levels = getMaxNumber(getNumberOfLevels(root->left), getNumberOfLevels(root->right)) + 1;
- x->levels = getMaxNumber(getNumberOfLevels(x->left), getNumberOfLevels(x->right)) + 1;
-
- // retorna a nova raiz
- return x;
+int updateLevels(Node *node) {
+	return getMaxNumber(getLevels(node->left), getLevels(node->right)) + 1;
 }
 
-Node *rightRotation(Node *root) {
-	Node *x = root->left; // filho da esquerda da root atual (nova raiz)
-	Node *y = x->right; // filho da direita do filho da esquerda da root
+Node *singleLeftRotation(Node *x) {
+	Node *y = x->right; // filho da direita da root atual (nova raiz)
+	Node *z = y->left; // filho da esquerda do filho da direita da root
 
-	// Raiz atual vira o filho da direita do seu filho da esquerda
-	x->right = root;
+	// Raiz atual vira o filho da esquerda do seu filho da direita
+  y->left = x;
 
-	// Filho da direita do filho da esquerda da raiz vira o filho da esquerda da nova posicao da raiz
-	root->left = y;
+	// Filho da esquerda do filho da direita da raiz vira o filho da direita da nova posicao da raiz
+	x->right = z;
 
 	// Atualiza o numero de niveis
-	root->levels = getMaxNumber(getNumberOfLevels(root->left), getNumberOfLevels(root->right)) + 1;
-  x->levels = getMaxNumber(getNumberOfLevels(x->left), getNumberOfLevels(x->right)) + 1;
+  x->levels = updateLevels(x);
+	y->levels = updateLevels(y);
 
+	// retorna a nova raiz
+  return y;
+}
+
+Node *singleRightRotation(Node *y) {
+	Node *x = y->left; // filho da esquerda da root atual (nova raiz)
+	Node *z = x->right; // filho da direita do filho da esquerda da root
+
+	// Raiz atual vira o filho da direita do seu filho da esquerda
+	x->right = y;
+
+	// Filho da direita do filho da esquerda da raiz vira o filho da esquerda da nova posicao da raiz
+	y->left = z;
+
+	// Atualiza o numero de niveis
+	y->levels = updateLevels(y);
+	x->levels = updateLevels(x);
+
+	// retorna a nova raiz
 	return x;
 }
 
-Node *insert(Node *node, int value) {
-	// Se a arvore estiver vazia, nao ha restricoes para insercao do novo no
-	if (node == NULL) return (createNewNode(value));
-	
-	// Se o valor a ser inserido for menor que o valor guardado no no, inserta a esquerda
-	if (value < node->value) node->left = insert(node->left, value);
-	
-	// Se o valor a ser inserido for maior que o valor guardado no no, inserta a direita
-	else if (value > node->value) node->right = insert(node->right, value);
+Node *doubleLeftRotation(Node *x) {
+	x->right = singleRightRotation(x->right);
+	return singleLeftRotation(x);
+}
 
-	// Nao eh permitido inserir valores iguais na arvore
+Node *doubleRightRotation(Node *y) {
+	y->left =  singleLeftRotation(y->left);
+	return singleRightRotation(y);
+}
+
+Node* insert(Node *node, int value) {
+	// Se a arvore estiver vazia, inserta um novo no sem restricoes
+	if (node == NULL) return(createNewNode(value));
+
+	// Realiza a insercao de novos nos conforme o algoritmo de uma arvore BST
+	if (value < node->value) node->left  = insert(node->left, value);
+	else if (value > node->value) node->right = insert(node->right, value);
 	else return node;
 
-	// Atualiza numero de niveis
-	node->levels = 1 + getMaxNumber(getNumberOfLevels(node->left), getNumberOfLevels(node->right));
+	// Atualiza o numero de niveis
+	node->levels = updateLevels(node);
 
-	// Encontra o fator de desequilibrio da arvore
-	int imbalanceFactor = getImbalanceFactor(node);
+	// Uma sub-arvore esta desequilibrada quando o resultado dessa funcao
+	// eh maior que 1 ou menor que -1. Nesses casos, temos que corrigir
+	// o desequilibrio realizando as rotacoes
+	int balance = getBalanceFactor(node);
 
-	if (imbalanceFactor > 1 && value < node->left->value) return rightRotation(node);
-
-	if (imbalanceFactor > -1 && value > node->right->value) return leftRotation(node);
-
-	if (imbalanceFactor > 1 && value > node->left->value) {
-		node->left = leftRotation(node->left);
-		return rightRotation(node);
+	if (balance > 1) {
+		if (value < node->left->value) return singleRightRotation(node);
+		else if (value > node->left->value) return doubleRightRotation(node);
 	}
 
-	if (imbalanceFactor < -1 && value < node->right->value) {
-		node->right = rightRotation(node->right);
-		return leftRotation(node);
+	if (balance < -1) {
+		if (value > node->right->value) return singleLeftRotation(node);
+		else if (node->right->value) return doubleLeftRotation(node);
 	}
 
 	return node;
+}
+
+void freeAVLTree(Node *node) {
+	if (node != NULL) {
+		freeAVLTree(node->left);
+		freeAVLTree(node->right);
+		free(node);
+	}
 }
 
 void printTreeInOrder(Node *root) {
@@ -123,22 +138,19 @@ void printTreeInOrder(Node *root) {
 	}
 }
 
-void printTreeInReverseOrder(Node *root) {
-	if (root != NULL) {
-		printTreeInReverseOrder(root->right);
-		printf("%d\n", root->value);
-		printTreeInReverseOrder(root->left);
-	}
-}
-
 int main (int argc, char *argv[]) {
 	Node *root = NULL;
-	int newNode;
+	int createNewNode;
 
 	// Loop principal que le os numeros do arquivo de entrada
-	while (1 == scanf("%d", &newNode)) {
-		root = insert(root, newNode);
+	while (1 == scanf("%d", &createNewNode)) {
+		// A cada valor lido, insertar na arvore AVL
+		root = insert(root, createNewNode);
 	}
+	
+	// Faz o display da arvore AVL em pre ordem
+	printTreeInOrder(root);
 
-	//printTreeInReverseOrder(root);
+	// Libera o espaco alocado
+	freeAVLTree(root);
 }
