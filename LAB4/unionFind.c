@@ -8,33 +8,36 @@ struct Set {
 	int *parent;
 
 	// vetor de alturas
-	// height[i] eh a altura da arvore que representa o conjunto
-	int *height;
+	// rank[i] eh a altura da arvore que representa o conjunto
+	int *rank;
 
-	// Numero de elementos da Union Find
-	int items;
+	int *setSize;
+
+	// Numero de conjuntos (sets) da Union Find
+	int numberOfSets;
 };
 typedef struct Set Set;
 
-void createNewSet(int items, Set *set) {
-	for (int i=0; i<items; i++) {
+void createNewSet(int numberOfSets, Set *set) {
+	for (int i=0; i<numberOfSets; i++) {
 		set->parent[i] = i;
 	}
 }
 
-Set *initializeSet(int items) {
+Set *initializeSet(int numberOfSets) {
 	Set *newSet = (Set*) malloc(sizeof(Set));
-	newSet->items = items;
-	newSet->parent = (int*) malloc(sizeof(int) * items);
-	newSet->height = (int*) malloc(sizeof(int) * items);
-	createNewSet(items, newSet);
+	newSet->numberOfSets = numberOfSets;
+	newSet->parent = (int*) malloc(sizeof(int) * numberOfSets);
+	newSet->rank = (int*) malloc(sizeof(int) * numberOfSets);
+	createNewSet(numberOfSets, newSet);
+	newSet->setSize = (int*) malloc(sizeof(int) * (numberOfSets - 1));
 
 	return newSet;
 }
 
 int find(int i, Set *set) {
 	if (set->parent[i] != i) set->parent[i] = find(set->parent[i], set);
-	return set->parent[i];
+	return i;
 }
 
 void Union(int x, int y, Set *set) {
@@ -43,22 +46,30 @@ void Union(int x, int y, Set *set) {
 
 	if (xset == yset) return;
 
-	if (set->height[xset] < set->height[yset])
+	if (set->rank[xset] < set->rank[yset]) {
 		set->parent[xset] = yset;
-	else if (set->height[xset] > set->height[yset])
-		set->parent[yset] = xset;
-	else {
-		set->parent[yset] = xset;
-		set->height[xset] = set->height[xset] + 1;
+		set->setSize[yset] += set->setSize[xset];
 	}
+
+	else if (set->rank[xset] > set->rank[yset]) {
+		set->parent[yset] = xset;
+		set->setSize[xset] += set->setSize[yset];
+	} 
+
+	else {
+		set->rank[yset]++;
+		set->setSize[yset] += set->setSize[xset];
+	}
+
+	set->numberOfSets--;
 }
 
 int main (int argc, char *argv[]) {
 	int n, m, count = 1;
 	int u, v;
-	
+
 	while (scanf("%d %d", &n, &m), n || m) {
-		Set *set = initializeSet(10);
+		Set *set = initializeSet(n);
 		
 		for (int i=0; i<m; i++) {
 			scanf("%d %d", &u, &v);
@@ -67,8 +78,9 @@ int main (int argc, char *argv[]) {
 			Union(u, v, set);
 		}
 
-		//printf("Case %d: %d", count++, set->items);
+		printf("Case %d: %d\n", count++, set->numberOfSets);
 	}
 
 	return 0;
+
 }
