@@ -11,85 +11,109 @@ struct UnionFind {
 	// rank[i] eh a altura da arvore que representa o conjunto
 	int *rank;
 
-	int *setSize;
-
-	// Numero de conjuntos (unionFinds) da Union Find
-	int numberOfUnionFinds;
+	// Numero de conjuntos (sets) da Union Find
+	int sets;
 };
 typedef struct UnionFind UnionFind;
 
-void createNewUnionFind(int numberOfUnionFinds, UnionFind *unionFind) {
-	for (int i=0; i<numberOfUnionFinds; i++) {
+void initializeSet(int sets, UnionFind *unionFind) {
+	for (int i=0; i<sets; i++) {
 		unionFind->parent[i] = i;
-		unionFind->setSize[i] = 1;
+		unionFind->rank[i] = 0;
 	}
 }
 
-UnionFind *initializeUnionFind(int numberOfUnionFinds) {
+UnionFind *initializeUnionFind(int sets) {
+	// Aloca espaco para a estrutura de dados
 	UnionFind *newUnionFind = (UnionFind*) malloc(sizeof(UnionFind));
-	newUnionFind->numberOfUnionFinds = numberOfUnionFinds;
-	newUnionFind->parent = (int*) malloc(sizeof(int) * numberOfUnionFinds);
-	newUnionFind->rank = (int*) malloc(sizeof(int) * numberOfUnionFinds);
-	newUnionFind->setSize = (int*) malloc(sizeof(int) * numberOfUnionFinds);
-	createNewUnionFind(numberOfUnionFinds, newUnionFind);
+
+	// Verifica erros
+	if (!newUnionFind) {
+		printf("Erro de alocacao de memoria.\n");
+		exit(0);
+	}
+
+	// Inicializa variaveis
+	newUnionFind->sets = sets;
+	newUnionFind->parent = (int*) malloc(sizeof(int) * sets);
+	newUnionFind->rank = (int*) malloc(sizeof(int) * sets);
+	initializeSet(sets, newUnionFind);
+
+	// Verifica erros
+	if (!newUnionFind->parent || !newUnionFind->rank) {
+		printf("Erro de alocacao de memoria.\n");
+		exit(0);
+	}
 
 	return newUnionFind;
 }
 
 int find(int i, UnionFind *unionFind) {
-	if (unionFind->parent[i] != i) unionFind->parent[i] = find(unionFind->parent[i], unionFind);
-	return i;
-}
+	// Se i nao eh o pai de si mesmo, entao i nao eh o representante do seu conjunto
+	if (unionFind->parent[i] != i) 
+		// Nesse caso, fazemos uma chamada recursiva de find e movemos o noh i diretamente
+		// sob o representante do seu conjunto, ate encontrarmos o ultimo
+		unionFind->parent[i] = find(unionFind->parent[i], unionFind);
 
-bool isSameUnionFind(int i, int j, UnionFind *unionFind) {
-	return find(i, unionFind) == find(j, unionFind);
+	return unionFind->parent[i];
 }
 
 void Union(int x, int y, UnionFind *unionFind) {
-	// Encontra o set dos elementos
+	// Encontra o representante dos sets dos elementos dados
 	int xset = find(x, unionFind);
 	int yset = find(y, unionFind);
 
-	// Se eles ja estiverem no mesmo set
+	// Se eles ja estiverem no mesmo set nao faz nada
 	if (xset == yset) return;
 
-	// Coloca o elemento de rank menor abaixo
-	// do elemento de rank maior
+	// Coloca o elemento de rank menor abaixo do elemento de rank maior, 
+	// de forma que o set de maior rank se torna o representante do de menor rank
 	if (unionFind->rank[xset] < unionFind->rank[yset]) {
 		unionFind->parent[xset] = yset;
-		unionFind->setSize[yset] += unionFind->setSize[xset];
 	}
 
 	else if (unionFind->rank[xset] > unionFind->rank[yset]) {
 		unionFind->parent[yset] = xset;
-		unionFind->setSize[xset] += unionFind->setSize[yset];
 	}
 
-	// Se os ranks forem iguais, incrementar o rank
+	// Se os ranks forem iguais, incrementar o rank e fazer com que o representante
+	// de y seja o representante de x tambem
 	else {
 		unionFind->parent[yset] = xset;
 		unionFind->rank[xset] = unionFind->rank[xset] + 1;
 	}
-
-	unionFind->numberOfUnionFinds--;
-
+	
+	// Decrementa a quantidade de sets armazenada pois se chegou ate aqui significa 
+	// que dois conjuntos foram unidos (se refere a quantidade de religioes)
+	unionFind->sets--;
 }
 
 int main (int argc, char *argv[]) {
 	int n, m, count = 1;
 	int u, v;
 
-	while (scanf("%d %d", &n, &m), n || m) {
+	while (1) {
+		// Le e armazena as informacoes de n e m
+		scanf("%d %d", &n, &m);
+
+		// Criterio de parada: n = 0
+		if (n == 0) break;
+
+		// Inicializa a estrutura de dados
 		UnionFind *unionFind = initializeUnionFind(n);
-		
+
 		for (int i=0; i<m; i++) {
+			// Le os pares dados, representados por u e v
 			scanf("%d %d", &u, &v);
-			u--;
-			v--;
+
+			// Realiza a operacao union find da estrutura
 			Union(u, v, unionFind);
 		}
 
-		printf("Case %d: %d\n", count++, unionFind->numberOfUnionFinds);
+		// Printa o resultado e incrementa o numero de casos
+		printf("Case %d: %d\n", count++, unionFind->sets);
+
+		// Libera o espaco do ponteiro
 		free(unionFind);
 	}
 
