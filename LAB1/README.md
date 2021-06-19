@@ -1,0 +1,1 @@
+Ordene numeros dados na entrada, e imprima os numeros em ordem. Seu programa deve ler numeros do teclado, e imprimi-los, 1 por linha, em ordem. Utilize o algoritmo mergeSort, quickSort ou um quadratico qualquer, de acordo com os argumentos da linha de comando. ( -m, -q ou nada)

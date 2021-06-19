@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 struct UnionFind {
-	// vetor de elementos parentais
-	// parent[i] eh o pai do ith elemento
+	// vetor de elementos que representam os conjuntos
+	// parent[i] eh o representante do ith elemento
 	int *parent;
 
 	// vetor de alturas
